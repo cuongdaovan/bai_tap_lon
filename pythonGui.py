@@ -1,10 +1,9 @@
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
-from tkinter.ttk import *
 import cv2 as cv
 import numpy as np
-import copy
+
 class Example(Frame):
   in_path=""
   grayscaled=[]
@@ -36,8 +35,9 @@ class Example(Frame):
     functionMenu.add_command(label="morphologyEx",command=self.morphologyEx)
     functionMenu.add_command(label="thredshold",command=self.normalize)
     functionMenu.add_command(label="loc",command=self.loc)
+    functionMenu.add_command(label="lam nhoe", command=self.lam_nhoe)
     functionMenu.add_command(label="nhanDang",command=self.nhanDang)
-    # functionMenu.add_command(label="tach bien so",command=self.tachBienSo)
+    functionMenu.add_command(label="tach bien so",command=self.tachBienSo)
     menuBar.add_cascade(label="Function",menu=functionMenu)
 
     aboutMenu.add_command(label="About me")
@@ -107,16 +107,13 @@ class Example(Frame):
           if(cnt>2):
       # print 'cnt=',cnt
             self.threshold[j:j+8,i:i+16]=[0]
+    cv.imshow("threshold", self.threshold)
 
-
-    self.image2=cv.dilate(self.threshold,kernel,2)
-    self.image2=cv.dilate(self.threshold,kernel,2)
-    self.image2=cv.dilate(self.threshold,kernel,2)
-    self.image2=cv.erode(self.threshold,kernel,2)
-    self.image2=cv.dilate(self.threshold,kernel,9)
-    self.image2=cv.erode(self.threshold,kernel,10)
+  def lam_nhoe(self):
+    kernel = np.ones((5,10),np.uint8)
     self.image2=cv.dilate(self.threshold,kernel,2)
     cv.imshow("image2",self.image2)
+
   def nhanDang(self):
     w,h,chanel=self.image.shape
     kernel = np.ones((5,10),np.uint8)
@@ -129,23 +126,32 @@ class Example(Frame):
 
       if(w>80 and w<250 and h>15 and h<40):
           cv.rectangle(self.image,(x,y),(x+w,y+h),(0,255,0),1)
-    cv.imshow('image',self.image)
-    self.imgBienSo=image[y:y+h+5,x:x+w]
-  def tachBienSo(self):
-    # grayscaled = cv.cvtColor(self.imgBienSo,cv.COLOR_BGR2GRAY)
-    # closing = cv.morphologyEx(grayscaled, cv.MORPH_BLACKHAT, kernel)
-    # retval,th=cv.threshold(grayscaled,210,255,cv.THRESH_BINARY_INV)
-    # print(th[y:y+h,x:x+w])
-    # # cv.imshow('th',th)
-    # im2, contours, hierarchy = cv.findContours(th,cv.RETR_LIST,cv.CHAIN_APPROX_NONE)
-    # for i in range(0,len(contours)):
-    #   x,y,w,h = cv.boundingRect(contours[i])
-    #   if w<h:
-    #     if(h>15 and w>5):
-        # img=th[y:y+h,x:x+w]
-        # cv.imshow('imso'+str(i),th[y:y+h,x:x+w])
-      # cv.rectangle(image3,(x,y),(x+w,y+h),(0,255,0),1)
+          self.imgBienSo=self.image[y:y+h,x:x+w]
+    # cv.imshow('image',self.image)
+    cv.imshow("imgBienSo",self.imgBienSo)
 
+  def tachBienSo(self):
+    grayscaled = cv.cvtColor(self.imgBienSo,cv.COLOR_BGR2GRAY)
+    kernel = np.ones((5,10),np.uint8)
+    w,h,chanel=self.imgBienSo.shape
+    size = w, h, chanel
+    closing = cv.morphologyEx(grayscaled, cv.MORPH_BLACKHAT, kernel)
+    cv.normalize(self.closing,self.closing,0,255,cv.NORM_MINMAX)
+    retval,th=cv.threshold(closing,100,255,cv.THRESH_BINARY)
+
+    cv.imshow('th',th)
+
+    # cv.imshow("image bien so grayscaled",grayscaled)
+    im2, contours, hierarchy = cv.findContours(th,cv.RETR_LIST,cv.CHAIN_APPROX_NONE)
+    print(contours)
+    for i in range(0,len(contours)):
+      x,y,w,h = cv.boundingRect(contours[i])
+      if h>w:
+        if(h>5 and w>5):
+          img=[]
+          img=th[y:y+h,x:x+w]
+          cv.imshow('imso'+str(i),img)
+      # cv.rectangle(image3,(x,y),(x+w,y+h),(0,255,0),1)
 
 root = Tk()
 root.geometry("800x500")
