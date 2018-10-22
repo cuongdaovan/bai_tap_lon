@@ -12,6 +12,8 @@ class Example(Frame):
   threshold=[]
   image2=[]
   imgBienSo=[]
+  contours=[]
+  noise_removal=[]
   def __init__(self, parent):
     Frame.__init__(self, parent)
  
@@ -32,12 +34,15 @@ class Example(Frame):
     menuBar.add_cascade(label="File", menu=fileMenu)
 
     functionMenu.add_command(label="lam xam",command=self.grayImage)
+    # functionMenu.add_command(label="giam nhieu", command=self.giam_nhieu)
     functionMenu.add_command(label="morphologyEx",command=self.morphologyEx)
     functionMenu.add_command(label="thredshold",command=self.normalize)
     functionMenu.add_command(label="loc",command=self.loc)
     functionMenu.add_command(label="lam nhoe", command=self.lam_nhoe)
     functionMenu.add_command(label="nhanDang",command=self.nhanDang)
     functionMenu.add_command(label="tach bien so",command=self.tachBienSo)
+    functionMenu.add_command(label="add 2 anh", command=self.add)
+    functionMenu.add_command(label="draw rectangle", command=self.draw_rectangle)
     menuBar.add_cascade(label="Function",menu=functionMenu)
 
     aboutMenu.add_command(label="About me")
@@ -66,8 +71,11 @@ class Example(Frame):
       label3.place(x=5, y=5)
     else:
       print("cuong")
+  def giam_nhieu(self):
+    self.noise_removal = cv.bilateralFilter(self.grayscaled,9,75,75)
+    cv.imshow("giam nhieu", self.noise_removal)
   def saveImage(self):
-    toSave = tkFileDialog.asksaveasfile()
+    cv.imwrite("biensoxe.jpg", self.imgBienSo)
   def morphologyEx(self):
     kernel = np.ones((5,10),np.uint8)
     self.closing = cv.morphologyEx(self.grayscaled, cv.MORPH_BLACKHAT, kernel)
@@ -78,7 +86,8 @@ class Example(Frame):
       label3.image = mincol
       label3.place(x=5, y=5)
   def normalize(self):
-    cv.normalize(self.closing,self.closing,0,255,cv.NORM_MINMAX)
+    # cv.normalize(self.closing,self.closing,0,255,cv.NORM_MINMAX)
+    # cv.imshow("closing",self.closing)
     retval,self.threshold=cv.threshold(self.closing,100,255,cv.THRESH_BINARY)
     cv.imshow('normalize',self.threshold)
   def loc(self):
@@ -114,6 +123,7 @@ class Example(Frame):
     self.image2=cv.dilate(self.threshold,kernel,2)
     cv.imshow("image2",self.image2)
 
+
   def nhanDang(self):
     w,h,chanel=self.image.shape
     kernel = np.ones((5,10),np.uint8)
@@ -125,8 +135,8 @@ class Example(Frame):
         s=w*h
 
       if(w>80 and w<250 and h>15 and h<40):
-          cv.rectangle(self.image,(x,y),(x+w,y+h),(0,255,0),1)
-          self.imgBienSo=self.image[y:y+h,x:x+w]
+          cv.rectangle(self.image,(x,y),(x+w,y+h+5),(0,255,0),1)
+          self.imgBienSo=self.image[y:y+h+5,x:x+w]
     # cv.imshow('image',self.image)
     cv.imshow("imgBienSo",self.imgBienSo)
 
@@ -151,7 +161,37 @@ class Example(Frame):
           img=[]
           img=th[y:y+h,x:x+w]
           cv.imshow('imso'+str(i),img)
-      # cv.rectangle(image3,(x,y),(x+w,y+h),(0,255,0),1)
+    #   # cv.rectangle(image3,(x,y),(x+w,y+h),(0,255,0),1)
+    # roi_gray = cv.cvtColor(self.imgBienSo,cv.COLOR_BGR2GRAY)
+    # roi_blur = cv.GaussianBlur(roi_gray,(3,3),1)
+    # ret,thre = cv.threshold(roi_blur,120,255,cv.THRESH_BINARY_INV)
+    # kerel3 = cv.getStructuringElement(cv.MORPH_RECT,(3,3))
+    # thre_mor = cv.morphologyEx(thre,cv.MORPH_DILATE,kerel3)
+    # _,cont,hier = cv.findContours(thre_mor,cv.RETR_LIST,cv.CHAIN_APPROX_SIMPLE)
+    # areas_ind = {}
+    # areas = []
+    # for ind,cnt in enumerate(cont):
+    #   area = cv.contourArea(cnt)
+    #   areas_ind[area] = ind
+    #   areas.append(area)
+    #   areas = sorted(areas,reverse=True)[2:9]
+    #   for i in areas:
+    #     (x,y,w,h) = cv.boundingRect(cont[areas_ind[i]])
+    #     cv.rectangle(self.imgBienSo,(x,y),(x+w,y+h),(0,255,0),2)
+    # cv.imshow("imgBienSo1",self.imgBienSo)
+        # plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
+  def add(self):
+    img=cv.imread('cuong1.jpg',1)
+    img01=img[10:400,10:600]
+    img1=cv.imread('sach.jpg',1)
+    img02=img1[10:400,10:600]
+    img2 = cv.add(img01,img02)
+    cv.imshow('img',img2)
+  def draw_rectangle(self):
+    img = cv.imread('cuong1.jpg',1)
+    cv.rectangle(img,(200,250),(500,500),(0,0,255),1)
+    cv.imshow('img', img)
+
 
 root = Tk()
 root.geometry("800x500")
