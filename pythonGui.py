@@ -34,7 +34,7 @@ class Example(Frame):
     menuBar.add_cascade(label="File", menu=fileMenu)
 
     functionMenu.add_command(label="lam xam",command=self.grayImage)
-    # functionMenu.add_command(label="giam nhieu", command=self.giam_nhieu)
+    functionMenu.add_command(label="giam nhieu", command=self.giam_nhieu)
     functionMenu.add_command(label="morphologyEx",command=self.morphologyEx)
     functionMenu.add_command(label="thredshold",command=self.normalize)
     functionMenu.add_command(label="loc",command=self.loc)
@@ -72,7 +72,7 @@ class Example(Frame):
     else:
       print("cuong")
   def giam_nhieu(self):
-    self.noise_removal = cv.bilateralFilter(self.grayscaled,9,75,75)
+    self.noise_removal = cv.bilateralFilter(self.image,9,75,75,20)
     cv.imshow("giam nhieu", self.noise_removal)
   def saveImage(self):
     cv.imwrite("biensoxe.jpg", self.imgBienSo)
